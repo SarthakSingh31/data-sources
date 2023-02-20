@@ -16,6 +16,11 @@ const REDIRECT_URI_ENV_VAR: &'static str = "GSHEET_DB_SYNC_REDIRECT_URI";
 /// The default port which the webserver will bind to. Also the default port of the redirect uri for OAuth.
 const DEFAULT_PORT: &'static str = "8889";
 
+/// The  enviorment variable used to get client id for gcp login
+const CLIENT_ID_ENV_VAR: &'static str = "GSHEET_DB_SYNC_CLIENT_ID";
+/// The  enviorment variable used to get client secret for gcp login
+const CLIENT_SECRET_ENV_VAR: &'static str = "GSHEET_DB_SYNC_CLIENT_SECRET";
+
 struct AppState {
     client: RwLock<Client>,
     user_consent_url: String,
@@ -26,8 +31,8 @@ struct AppState {
 async fn main() {
     // This client is used to do the oauth authentication with google
     let client = Client::new(
-        "386071646136-u34h0h3bkhsk5pm9a9p0mcvoa8h8krhl.apps.googleusercontent.com",
-        "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",
+        env::var(CLIENT_ID_ENV_VAR).unwrap(),
+        env::var(CLIENT_SECRET_ENV_VAR).unwrap(),
         env::var(REDIRECT_URI_ENV_VAR).unwrap_or(format!(
             "http://127.0.0.1:{}",
             env::var(PORT_ENV_VAR).unwrap_or(DEFAULT_PORT.to_string())
