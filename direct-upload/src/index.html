@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Direct Upload</title>
+    </head>
+    <body>
+        <form id="upload">
+            <input type="file" id="file-upload" name="file-upload">
+            <input type="submit" value="Submit">
+        </form>
+
+        <script>
+            const PUT_URL = "{PUT_URL}";
+            
+            document.getElementById("upload").onsubmit = (evt) => {
+                evt.preventDefault();
+
+                // TODO: This fetch goes through for some reason
+                const formData = new FormData();
+                formData.append('file', document.getElementById("file-upload").files[0]);
+
+                fetch(PUT_URL, { method: 'PUT', body: formData }).catch(console.log);
+
+                // TODO: This fetch does not go through for some reason
+                const file = document.getElementById("file-upload").files[0];
+
+                fetch(PUT_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': file.type,
+                        'Content-Length': file.size,
+                    },
+                    body: file,
+                }).catch(console.log);
+            }
+        </script>
+    </body>
+</html>
