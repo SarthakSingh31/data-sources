@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Show CSV</title>
+
+        <style>
+            table, td, th {
+                border: 1px solid black;
+                text-align: left;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <form id="file-form">
+            <input type="file" id="upload-csv" name="filename">
+        </form>
+        <form id="upload-form">
+            <label for="table-name">Table Name:</label>
+            <input type="text" id="table-name" name="table-name">
+            <label for="duri">Database URI:</label>
+            <input type="text" id="db-uri" name="uri" required>
+            <input type="submit" value="Sync">
+        </form>
+
+        <table id="d-table"></table>
+
+        <script>
+            let table = document.getElementById("d-table");
+            let table_data = null;
+            let fileUpload = document.getElementById('upload-csv');
+
+            fileUpload.onchange = (evt) => {
+                while (table.children.length > 0) { table.children[0].remove() }
+
+                const formData = new FormData();
+                formData.append('file', fileUpload.files[0]);
+
+                fetch("csv_to_json", { method: 'POST', body: formData })
+                    .then((resp) => resp.json())
+                    .then((data) => {
+                        table_data = data;
+
+                        let table_row = document.createElement("tr");
+
+                        table_data.headers.forEach(cell => {
+                            let table_cell = document.createElement("th");
+                            table_cell.innerText = cell;
+
+                            table_row.appendChild(table_cell);
+                        });
+
+                        table.appendChild(table_row);
+
+                        table_data.data.forEach(row => {
+                            let table_row = document.createElement("tr");
+
+                            row.forEach(cell => {
+                                let table_cell = document.createElement("td");
+                                table_cell.innerText = cell;
+
+                                table_row.appendChild(table_cell);
+                            });
+
+                            table.appendChild(table_row);
+                        });
+                    })
+                    .catch(console.log);
+            }
+
+            document.getElementById('upload-form').onsubmit = (evt) => {
+                evt.preventDefault();
+
+                fetch(
+                    "upload_to_db?table_name=" + document.getElementById("table-name").value + "&db_uri=" + document.getElementById("db-uri").value,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(table_data),
+                    }
+                )
+                    .catch(console.log);
+            }
+        </script>
+    </body>
+</html>

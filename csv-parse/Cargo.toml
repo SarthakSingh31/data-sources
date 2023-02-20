@@ -1,0 +1,13 @@
+[package]
+name = "csv-parse"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.6.7", features = ["multipart"] }
+csv = "1.2.0"
+serde = { version = "1.0.152", features = ["derive"] }
+sqlx = { version = "0.6.2", features = ["sqlite", "postgres", "any", "runtime-tokio-rustls"] }
+tokio = { version = "1.25.0", features = ["macros", "rt-multi-thread"] }

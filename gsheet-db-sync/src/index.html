@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>GSheet Docs Sync</title>
+
+        <style>
+            table, td, th {  
+                border: 1px solid black;
+                text-align: left;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <form id="fetch">
+            <label for="sid">Spreadsheet ID:</label>
+            <input type="text" id="sid" name="id" required>
+            <input type="submit" value="Fetch">
+            <span id="fetch-time"></span>
+        </form>
+        <form id="sync">
+            <label for="duri">Database URI:</label>
+            <input type="text" id="duri" name="uri" required>
+            <input type="submit" value="Sync">
+            <span id="sync-time"></span>
+        </form>
+
+        <br>
+
+        <table id="stable"></table>
+
+        <script>
+            let spreadsheet_id = null;
+            let spreadsheet_data = null;
+
+            document.getElementById("fetch").onsubmit = (evt) => {
+                evt.preventDefault();
+
+                const t_start = Date.now();
+
+                let table = document.getElementById("stable");
+                while (table.children.length > 0) { table.children[0].remove() }
+
+                spreadsheet_id = document.getElementById("sid").value;
+
+                fetch('fetch_spreadsheet?id=' + spreadsheet_id)
+                    .then((response) => response.json())
+                    .then((data) => spreadsheet_data = data)
+                    .then(() => {
+                        let table = document.getElementById("stable");
+
+                        spreadsheet_data.forEach(row => {
+                            let table_row = document.createElement("tr");
+
+                            row.forEach(cell => {
+                                let table_cell = document.createElement("td");
+                                table_cell.innerText = cell;
+
+                                table_row.appendChild(table_cell);
+                            })
+
+                            table.appendChild(table_row);
+                        });
+
+                        document.getElementById("fetch-time").innerText = ((Date.now() - t_start) / 1000) + " sec";
+                    })
+                    .catch(console.log);
+            };
+
+            document.getElementById("sync").onsubmit = (evt) => {
+                evt.preventDefault();
+
+                const t_start = Date.now();
+
+                if (spreadsheet_id !== null) {
+                    fetch('sync_spreadsheet?id=' + spreadsheet_id + "&db=" + document.getElementById("duri").value, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(spreadsheet_data),
+                    })
+                    .then(() => document.getElementById("sync-time").innerText = ((Date.now() - t_start) / 1000) + " sec")
+                    .catch(console.log);
+                }
+            };
+        </script>
+    </body>
+</html>
