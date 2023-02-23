@@ -1,10 +1,11 @@
 use std::env;
 use std::sync::Arc;
 
-use axum::extract::State;
+use axum::extract::{Query, State};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing;
-use google_cloud_storage::client::Client;
+use google_cloud_default::WithAuthExt;
+use google_cloud_storage::client::{Client, ClientConfig};
 use google_cloud_storage::sign::{SignedURLMethod, SignedURLOptions};
 
 /// The enviorment variable used to get the port of the server
@@ -18,12 +19,15 @@ struct AppState {
 
 #[tokio::main]
 async fn main() {
-    let client = Client::default()
+    let config = ClientConfig::default()
+        .with_auth()
         .await
-        .expect("Failed to create gcp client");
+        .expect("Failed to get GCP authentication files");
+    let client = Client::new(config);
 
     let app = axum::Router::new()
         .route("/", routing::get(index))
+        .route("/get_signed_url", routing::get(get_signed_url))
         .with_state(Arc::new(AppState { client }));
 
     axum::Server::bind(
@@ -39,20 +43,30 @@ async fn main() {
     .unwrap();
 }
 
-async fn index(State(state): State<Arc<AppState>>) -> Response {
-    let html = include_str!("index.html");
-    let signed_url = state
+async fn index() -> Response {
+    Html(include_str!("index.html")).into_response()
+}
+
+#[derive(serde::Deserialize)]
+struct SigningArgs {
+    name: String,
+}
+
+async fn get_signed_url(
+    State(state): State<Arc<AppState>>,
+    Query(args): Query<SigningArgs>,
+) -> Response {
+    state
         .client
         .signed_url(
             "test-bucket-the-first",
-            "",
+            &args.name,
             SignedURLOptions {
                 method: SignedURLMethod::PUT,
                 ..Default::default()
             },
         )
         .await
-        .expect("Failed to generate the signing url");
-
-    Html(html.replace("{PUT_URL}", &signed_url)).into_response()
+        .expect("Failed to generate the signing url")
+        .into_response()
 }

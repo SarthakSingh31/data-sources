@@ -240,7 +240,9 @@ name = "direct-upload"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "google-cloud-default",
  "google-cloud-storage",
+ "serde",
  "tokio",
 ]
 
@@ -376,13 +378,14 @@ dependencies = [
 
 [[package]]
 name = "google-cloud-auth"
-version = "0.8.1"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08d86a8cc190da6ab0cff095fcbfe95a057496428ff2a0a711ca110f2fcbb231"
+checksum = "44074eed3f9f0c05a522090f0cf1cfcdaef29965424d07908a6a372ffdee0985"
 dependencies = [
  "async-trait",
  "base64 0.21.0",
  "google-cloud-metadata",
+ "google-cloud-token",
  "home",
  "jsonwebtoken",
  "reqwest",
@@ -396,10 +399,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "google-cloud-metadata"
-version = "0.3.1"
+name = "google-cloud-default"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d2c3b00f0a07a1a9efffc1bdd0603ef853d8a6d4ee9de8d73039cd92fdc8f26"
+checksum = "1d47d0a154793b622b0aa39fda79d40694b6ef9aa8c932c0342f2088502aa3ea"
+dependencies = [
+ "async-trait",
+ "google-cloud-auth",
+ "google-cloud-metadata",
+ "google-cloud-storage",
+]
+
+[[package]]
+name = "google-cloud-metadata"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96e4ad0802d3f416f62e7ce01ac1460898ee0efc98f8b45cd4aab7611607012f"
 dependencies = [
  "reqwest",
  "thiserror",
@@ -408,16 +423,15 @@ dependencies = [
 
 [[package]]
 name = "google-cloud-storage"
-version = "0.8.1"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d877fcae5d4507b9e7ac199ff183c25a1b7962646b2eb57070212a8041f4d8e1"
+checksum = "70ed4e4f53bc4816db6f5669fb079338a8b6375a985fd6c9a1f3f8a864922541"
 dependencies = [
  "async-stream",
  "base64 0.21.0",
  "bytes",
  "futures-util",
- "google-cloud-auth",
- "google-cloud-metadata",
+ "google-cloud-token",
  "hex",
  "once_cell",
  "percent-encoding",
@@ -434,6 +448,15 @@ dependencies = [
  "tokio-util",
  "tracing",
  "url",
+]
+
+[[package]]
+name = "google-cloud-token"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f9fa5c241ab09d3531496127ef107a29cc2a8fde63676f7cbbe56a8a5e75883"
+dependencies = [
+ "async-trait",
 ]
 
 [[package]]
@@ -683,6 +706,16 @@ name = "mime"
 version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
+
+[[package]]
+name = "mime_guess"
+version = "2.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4192263c238a5f0d0c6bfd21f336a313a4ce1c450542449ca191bb657b4642ef"
+dependencies = [
+ "mime",
+ "unicase",
+]
 
 [[package]]
 name = "mio"
@@ -1049,6 +1082,7 @@ dependencies = [
  "js-sys",
  "log",
  "mime",
+ "mime_guess",
  "native-tls",
  "once_cell",
  "percent-encoding",
@@ -1513,6 +1547,15 @@ name = "typenum"
 version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
+
+[[package]]
+name = "unicase"
+version = "2.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "50f37be617794602aabbeee0be4f259dc1778fabe05e2d67ee8f79326d5cb4f6"
+dependencies = [
+ "version_check",
+]
 
 [[package]]
 name = "unicode-bidi"

@@ -6,33 +6,33 @@
     </head>
     <body>
         <form id="upload">
-            <input type="file" id="file-upload" name="file-upload">
-            <input type="submit" value="Submit">
+            <input type="file" id="file-upload" name="file">
+            <input type="submit" value="Upload">
+            <span id="uploaded-percent"></span>
         </form>
 
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
         <script>
-            const PUT_URL = "{PUT_URL}";
-            
             document.getElementById("upload").onsubmit = (evt) => {
                 evt.preventDefault();
 
-                // TODO: This fetch goes through for some reason
-                const formData = new FormData();
-                formData.append('file', document.getElementById("file-upload").files[0]);
-
-                fetch(PUT_URL, { method: 'PUT', body: formData }).catch(console.log);
-
-                // TODO: This fetch does not go through for some reason
                 const file = document.getElementById("file-upload").files[0];
+                const up_precent = document.getElementById('uploaded-percent');
 
-                fetch(PUT_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': file.type,
-                        'Content-Length': file.size,
-                    },
-                    body: file,
-                }).catch(console.log);
+                fetch("get_signed_url?name=" + encodeURIComponent(file.name))
+                    .then((resp) => {
+                        resp.text().then((put_url) => {
+                            axios.request({
+                                method: "put", 
+                                url: put_url, 
+                                data: file, 
+                                onUploadProgress: (p) => {
+                                    up_precent.innerText = (p.progress  * 100).toFixed(2) + " %";
+                                }
+                            }).catch(console.log);
+                        });
+                    })
+                    .catch(console.log);
             }
         </script>
     </body>
